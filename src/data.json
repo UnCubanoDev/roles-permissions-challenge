@@ -1,0 +1,27 @@
+{
+    "data": [
+        {
+            "id": "",
+            "name": "Admin",
+            "permissions": [
+                "STORAGE:READ",
+                "PROJECT:WRITE",
+                "PROJECT:READ",
+                "STORAGE:WRITE"
+            ]
+        },
+        {
+            "id": "",
+            "name": "User",
+            "permissions": [
+                "STORAGE:READ",
+                "PROJECT:READ"
+            ]
+        },
+        {
+            "id": "",
+            "name": "Guest",
+            "permissions": []
+        }
+    ]
+}
