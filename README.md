@@ -52,15 +52,19 @@ Para la integración, asuma que se comunica con una API (utilizar una variable d
 Para ejecutar la solución de la prueba técnica, sigue los siguientes pasos:
 1. Clona este repositorio en tu máquina local.
 2. Abre una terminal y navega hasta la carpeta raíz del proyecto.
-3. Ejecuta el siguiente comando para instalar las dependencias del proyecto:
+3. Ejecuta el siguiente comando para usar la version de Node que se encuentra en .nvmrc
+    ```bash
+    nvm use
+    ```
+4. Ejecuta el siguiente comando para instalar las dependencias del proyecto:
    ```bash
    npm install
    ```
-4. Luego, puedes iniciar la aplicación utilizando el siguiente comando:
+5. Luego, puedes iniciar la aplicación utilizando el siguiente comando:
    ```bash
    npm start
    ```
-5. Abre tu navegador web y visita http://localhost:3000 para ver la aplicación en funcionamiento.
+6. Abre tu navegador web y visita http://localhost:3000 para ver la aplicación en funcionamiento.
 
 ## Capturas de Pantalla
 

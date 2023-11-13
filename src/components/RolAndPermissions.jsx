@@ -47,7 +47,7 @@ const RoleAndPermissions = ({ roles, permissions }) => {
     };
     const handleOkButtonClickRol = () => {
         if (isValidRol(newRol)) {
-            vRol.push(new RolModel(`${(vRol[vRol.length - 1].id + 1)}`, newRol, vPermissions.filter(element => element.includes(":READ"))));
+            vRol.push(new RolModel(`${parseInt(vRol[vRol.length-1].id) + 1}`, newRol, vPermissions.filter(element => element.includes(":READ"))));
             setVRol(vRol);
             setShowModalRol(false);
         } else {
