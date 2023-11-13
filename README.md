@@ -64,7 +64,7 @@ Para ejecutar la solución de la prueba técnica, sigue los siguientes pasos:
 
 ## Capturas de Pantalla
 
-![Tabla de Ejemplo]("../../table.png")
+![Tabla de Ejemplo]("../../table.png)
 
 ## Recursos Adicionales
 
