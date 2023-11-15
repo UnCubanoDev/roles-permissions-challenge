@@ -181,9 +181,7 @@ const RoleAndPermissions = ({ roles, permissions }) => {
         setVRol(newRoles);
     }
     const handleDeletePermission = async (element) => {
-        console.log(element);
         const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => permission !== element) }));
-        console.log(newRoles);
         return setVRol(newRoles) && setVPermission(vPermissions.filter(permission => permission !== element));
     }
     const handleUpdateEntity = async (element) => {
@@ -191,8 +189,6 @@ const RoleAndPermissions = ({ roles, permissions }) => {
 
         if (filteredElements.length > 0) {
             const newRoles = vRol.map(item => {
-                console.log(item);
-                console.log(filteredElements.includes(item))
                 if (filteredElements.includes(item)) {
                     const uniquePermissions = Array.from(new Set(item.permissions.filter(permission => !permission.includes(element))));
                     return { ...item, permissions: uniquePermissions };
@@ -218,13 +214,11 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                 }
             });
             const newPermission = vPermissions.filter(permission => !permission.includes(element));
-            console.log(newPermission);
             setVRol(newRoles)
             setVPermission(newPermission);
         } else {
             const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => !permission.includes(element)) }));
             const newPermission = vPermissions.filter(permission => !permission.includes(element));
-            console.log(newPermission);
             setVRol(newRoles)
             setVPermission(newPermission);
         }
@@ -388,7 +382,6 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                                             ))}
                                         </ul>
                                     </div>
-                                    {/* <p className="text-sm">Permisos: {`[ ${rol.permissions} ]`}</p> */}
                                 </div>
                             ))}
                         </div>
