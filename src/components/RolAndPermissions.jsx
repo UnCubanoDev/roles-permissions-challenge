@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { RolModel } from "../model/RolModel";
+import { FaRegSquare, FaTrash } from 'react-icons/fa';
 
 const RoleAndPermissions = ({ roles, permissions }) => {
+
+    const env = import.meta.env;
+    const [selectedRow, setSelectedRow] = useState(null);
     const [showModalPermission, setShowModalPermission] = useState(false);
+    const [responseData, setResponseData] = useState(false);
     const [showModalRol, setShowModalRol] = useState(false);
     const [showArrayRol, setShowArrayRol] = useState(false);
     const [vRol, setVRol] = useState(roles);
     const [vPermissions, setVPermission] = useState(permissions);
+    const [vRolDelete, setVRolDelete] = useState([]);
     const [newPermission, setNewPermission] = useState('');
     const [newRol, setNewRol] = useState('');
+    const handleMouseOver = (id) => {
+        setSelectedRow(id);
+    }
+    const handleMouseOut = () => {
+        setSelectedRow(null);
+    }
     const handleAddRol = () => {
         setShowModalRol(true);
     }
@@ -38,17 +50,38 @@ const RoleAndPermissions = ({ roles, permissions }) => {
     };
 
     const handleOkButtonClickPermission = () => {
-        if (isValidPermission(newPermission)) {
-            setVPermission(vPermissions.push(newPermission));
+        if (isValidPermission(newPermission.toUpperCase())) {
+            vPermissions.push(newPermission.toUpperCase());
+            setVPermission(vPermissions);
+            setNewPermission('');
             setShowModalPermission(false);
         } else {
             alert('El permiso introducido no es válido.');
         }
     };
-    const handleOkButtonClickRol = () => {
+    const handleOkButtonClickRol = async () => {
         if (isValidRol(newRol)) {
-            vRol.push(new RolModel(`${parseInt(vRol[vRol.length-1].id) + 1}`, newRol, vPermissions.filter(element => element.includes(":READ"))));
+            vRol.push(new RolModel(`${parseInt(vRol[vRol.length - 1].id) + 1}`, newRol, vPermissions.filter(element => element.includes(":READ"))));
             setVRol(vRol);
+            try {
+                const response = await fetch(`${env.VITE_REACT_APP_API_URL}/roles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(vRol)
+                });
+
+                if (!response.ok) {
+                    throw new Error('La respuesta de la red no es correcta');
+                }
+
+                const jsonResponse = await response.json();
+                setResponseData(true);
+            } catch (error) {
+                console.error('Error al enviar los datos:', error);
+            }
+            setNewRol('');
             setShowModalRol(false);
         } else {
             alert('El rol introducido no es válido o ya se encuentra registrado.');
@@ -68,7 +101,76 @@ const RoleAndPermissions = ({ roles, permissions }) => {
     const isValidRol = (rolName) => {
         return rolName.trim() !== "" && !vRol.find(element => element.name === rolName)
     }
-    const handleSave = () => {
+    const handleUpdateRol = async () => {
+        try {
+            const response = await fetch(`${env.VITE_REACT_APP_API_URL}/roles`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(vRol)
+            });
+
+            if (!response.ok) {
+                throw new Error('La respuesta de la red no es correcta');
+            }
+
+            const jsonResponse = await response.json();
+            setResponseData(true);
+        } catch (error) {
+            console.error('Error al enviar los datos:', error);
+        }
+
+    }
+    const handleDeleteRol = async (id) => {
+        let newArray = vRol.filter(objeto => objeto.id !== id);
+        setVRol(newArray);
+        try {
+            const response = await fetch(`${env.VITE_REACT_APP_API_URL}/roles`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(id)
+            });
+
+            if (!response.ok) {
+                throw new Error('La respuesta de la red no es correcta');
+            }
+
+            const jsonResponse = await response.json();
+            setResponseData(true);
+        } catch (error) {
+            console.error('Error al enviar los datos:', error);
+        }
+    }
+    const handlePermissions = (id) => {
+        vRol.map((rol) => {
+            if(rol.id == id){
+                console.log(rol);
+                if(rol.permissions.length != vPermissions.length){
+                    rol.permissions = vPermissions;
+                }else {
+                    rol.permissions = [];
+                }
+                setVRol(vRol);
+            }
+        })
+    }
+    const handleDeletePermission = async (element) => {
+        if(vRol.every(item => item.permissions.includes(element))){
+            vRol.map(item => ({ ...item, permissions: [] }))
+            console.log("Todos los permisos")
+            setVRol(vRol);
+        }{
+            vRol.map(item => ({ ...item, permissions: [...vPermissions] }))
+            setVRol(vRol);
+            setVPermission(vPermissions)
+            console.log("No Todos los permisos")
+        }
+    }
+    const handleSave = async () => {
+
         setShowArrayRol(true);
     }
     return (
@@ -76,29 +178,69 @@ const RoleAndPermissions = ({ roles, permissions }) => {
             <div className="min-w-full">
                 <table className="border-collapse rounded-md shadow-lg table-auto m-2">
                     <thead>
-                        <tr className="bg-gray-100">
+                        <tr className="bg-gray-100 text-center">
                             <th className='py-3 px-3 sticky left-0 top-0 bg-gray-100'></th>
                             {
                                 countRepeatWord(vPermissions).map((permission, index) => {
-                                    return <th className="text-center border-collapse border px-2" colSpan={permission.repeats} key={index}>{capitalizeText(permission.word)}</th>
+                                    return <th className="text-center border-collapse border px-2" colSpan={permission.repeats} key={index}>
+                                        {capitalizeText(permission.word)}
+                                    </th>
                                 })
                             }
                         </tr>
-                        <tr>
+                        <tr className="text-center">
                             <th className="sticky left-0 top-0 bg-gray-100">Roles</th>
                             {
                                 vPermissions.map((permission, index) => {
-                                    return <th className="text-center border-collapse border px-2 bg-gray-100" colSpan={1} key={index}>{capitalizeText(permission.split(":")[1])}</th>
+                                    return <th className="text-center border-collapse border p-3 bg-gray-100 justify-between flex-row"
+                                        key={index} onMouseOver={() => handleMouseOver(index)}
+                                        onMouseOut={handleMouseOut}
+                                        colSpan={1}>
+                                        {selectedRow === index && (
+                                            <FaRegSquare
+                                                onClick={() => handleDeleteRol(index)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
+                                        {capitalizeText(permission.split(":")[1])}
+                                        {selectedRow === index && (
+                                            <FaTrash
+                                                onClick={() => handleDeletePermission(permission)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
+                                    </th>
                                 })
                             }
+                            <td className="text-center" rowSpan={vRol.length + 2}>
+                                <button className="bg-gray-100 rounded-md p-3 m-2" onClick={handleAddNewPermission}>
+                                    +
+                                </button>
+                            </td>
                         </tr>
                     </thead>
                     <tbody>
                         {
                             vRol.map((rol, index) => {
                                 return <tr className="p-3 text-center" key={index}>
-                                    <td className="sticky left-0 top-0 bg-white">
+                                    <td className="sticky left-0 top-0 bg-white items-center flex" key={rol.id}
+                                        onMouseOver={() => handleMouseOver(rol.id)}
+                                        onMouseOut={handleMouseOut}
+                                        colSpan={3}
+                                        rowSpan={1}>
+                                        {selectedRow === rol.id && (
+                                            <FaRegSquare
+                                                onClick={() => handlePermissions(rol.id)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
                                         {rol.name}
+                                        {selectedRow === rol.id && (
+                                            <FaTrash
+                                                onClick={() => handleDeleteRol(rol.id)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
                                     </td>
                                     {
                                         vPermissions.map((permission, index) => {
@@ -164,6 +306,18 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                                     <p className="text-sm">Permisos: {`[ ${rol.permissions} ]`}</p>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+                {responseData && (
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg flex flex-col items-center space-y-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nombre">
+                                La solicitud ha sido satisfactoria...
+                            </label>
+                            <div>
+                                <button className="px-4 py-2 bg-blue-500 text-white rounded-md" onClick={setResponseData(false)}>Ok</button>
+                            </div>
                         </div>
                     </div>
                 )}

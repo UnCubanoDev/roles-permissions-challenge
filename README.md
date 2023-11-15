@@ -64,15 +64,16 @@ Para ejecutar la solución de la prueba técnica, sigue los siguientes pasos:
    ```bash
    npm start
    ```
-6. Abre tu navegador web y visita http://localhost:3000 para ver la aplicación en funcionamiento.
+6. Abre tu navegador web y visita http://localhost:5137 para ver la aplicación en funcionamiento.
 
 ## Capturas de Pantalla
 
-![Tabla de Ejemplo]("../../table.png)
+![Tabla de Ejemplo]('../../table.png)
 
 ## Recursos Adicionales
 
-- Documentación de React.js (https://reactjs.org/docs)
+- Documentación de React.js (https://es.react.dev/learn)
 - Documentación de Tailwind CSS (https://tailwindcss.com/docs)
+- Documentación de Vite (https://es.vitejs.dev/guide)
 
 ¡Gracias por revisar la solución de la prueba técnica!
