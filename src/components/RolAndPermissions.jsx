@@ -219,13 +219,13 @@ const RoleAndPermissions = ({ roles, permissions }) => {
             });
             const newPermission = vPermissions.filter(permission => !permission.includes(element));
             console.log(newPermission);
-            setVRol(newRoles) 
+            setVRol(newRoles)
             setVPermission(newPermission);
         } else {
             const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => !permission.includes(element)) }));
             const newPermission = vPermissions.filter(permission => !permission.includes(element));
             console.log(newPermission);
-            setVRol(newRoles) 
+            setVRol(newRoles)
             setVPermission(newPermission);
         }
     }
@@ -380,7 +380,15 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                                 <div key={rol.id}>
                                     <h2 className="text-lg font-bold text-center">Id: {rol.id}</h2>
                                     <p className="text-sm">Nombre: {rol.name}</p>
-                                    <p className="text-sm">Permisos: {`[ ${rol.permissions} ]`}</p>
+                                    <div>
+                                        <h2>Permisos:</h2>
+                                        <ul>
+                                            {rol.permissions.map((elemento, index) => (
+                                                <li key={index}>{`- ${elemento}`}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    {/* <p className="text-sm">Permisos: {`[ ${rol.permissions} ]`}</p> */}
                                 </div>
                             ))}
                         </div>
