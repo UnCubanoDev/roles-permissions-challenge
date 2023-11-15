@@ -5,21 +5,34 @@ import { FaRegSquare, FaTrash } from 'react-icons/fa';
 const RoleAndPermissions = ({ roles, permissions }) => {
 
     const env = import.meta.env;
-    const [selectedRow, setSelectedRow] = useState(null);
+    const [selectedRol, setSelectedRol] = useState(null);
+    const [selectedEntity, setSelectedEntity] = useState(null);
+    const [selectedPermission, setSelectedPermission] = useState(null);
     const [showModalPermission, setShowModalPermission] = useState(false);
     const [responseData, setResponseData] = useState(false);
     const [showModalRol, setShowModalRol] = useState(false);
     const [showArrayRol, setShowArrayRol] = useState(false);
     const [vRol, setVRol] = useState(roles);
     const [vPermissions, setVPermission] = useState(permissions);
-    const [vRolDelete, setVRolDelete] = useState([]);
     const [newPermission, setNewPermission] = useState('');
     const [newRol, setNewRol] = useState('');
-    const handleMouseOver = (id) => {
-        setSelectedRow(id);
+    const handleMouseOverRol = (id) => {
+        setSelectedRol(id);
     }
-    const handleMouseOut = () => {
-        setSelectedRow(null);
+    const handleMouseOverEntity = (id) => {
+        setSelectedEntity(id);
+    }
+    const handleMouseOverPermission = (id) => {
+        setSelectedPermission(id);
+    }
+    const handleMouseOutRol = () => {
+        setSelectedRol(null);
+    }
+    const handleMouseOutEntity = () => {
+        setSelectedEntity(null);
+    }
+    const handleMouseOutPermission = () => {
+        setSelectedPermission(null);
     }
     const handleAddRol = () => {
         setShowModalRol(true);
@@ -101,7 +114,7 @@ const RoleAndPermissions = ({ roles, permissions }) => {
     const isValidRol = (rolName) => {
         return rolName.trim() !== "" && !vRol.find(element => element.name === rolName)
     }
-    const handleUpdateRol = async () => {
+    const handleUpdateRol = async (element) => {
         try {
             const response = await fetch(`${env.VITE_REACT_APP_API_URL}/roles`, {
                 method: 'PUT',
@@ -120,7 +133,13 @@ const RoleAndPermissions = ({ roles, permissions }) => {
         } catch (error) {
             console.error('Error al enviar los datos:', error);
         }
-
+        if (vRol.every(item => item.permissions.includes(element))) {
+            const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => permission !== element) }));
+            return setVRol(newRoles);
+        } {
+            const newRoles = vRol.map(item => ({ ...item, permissions: [...item.permissions, element] }));
+            return setVRol(newRoles);
+        }
     }
     const handleDeleteRol = async (id) => {
         let newArray = vRol.filter(objeto => objeto.id !== id);
@@ -145,28 +164,69 @@ const RoleAndPermissions = ({ roles, permissions }) => {
         }
     }
     const handlePermissions = (id) => {
-        vRol.map((rol) => {
-            if(rol.id == id){
-                console.log(rol);
-                if(rol.permissions.length != vPermissions.length){
-                    rol.permissions = vPermissions;
-                }else {
+        const newRoles = vRol.map((rol) => {
+            if (rol.id == id) {
+                if (rol.permissions.length != vPermissions.filter(permission => permission.trim() !== '').length) {
+                    rol.permissions = rol.permissions.concat(vPermissions.filter(element => !rol.permissions.includes(element)));
+                    const uniquePermissions = Array.from(new Set(rol.permissions));
+                    rol.permissions = uniquePermissions.filter(permission => permission.trim() !== '');
+                } else {
                     rol.permissions = [];
                 }
-                setVRol(vRol);
+                return rol;
+            } else {
+                return rol;
             }
-        })
+        });
+        setVRol(newRoles);
     }
     const handleDeletePermission = async (element) => {
-        if(vRol.every(item => item.permissions.includes(element))){
-            vRol.map(item => ({ ...item, permissions: [] }))
-            console.log("Todos los permisos")
-            setVRol(vRol);
-        }{
-            vRol.map(item => ({ ...item, permissions: [...vPermissions] }))
-            setVRol(vRol);
-            setVPermission(vPermissions)
-            console.log("No Todos los permisos")
+        console.log(element);
+        const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => permission !== element) }));
+        console.log(newRoles);
+        return setVRol(newRoles) && setVPermission(vPermissions.filter(permission => permission !== element));
+    }
+    const handleUpdateEntity = async (element) => {
+        const filteredElements = vRol.filter(item => item.permissions.some(permission => permission.includes(element)));
+
+        if (filteredElements.length > 0) {
+            const newRoles = vRol.map(item => {
+                console.log(item);
+                console.log(filteredElements.includes(item))
+                if (filteredElements.includes(item)) {
+                    const uniquePermissions = Array.from(new Set(item.permissions.filter(permission => !permission.includes(element))));
+                    return { ...item, permissions: uniquePermissions };
+                } else {
+                    return item;
+                }
+            });
+            return setVRol(newRoles);
+        } else {
+            const newRoles = vRol.map(item => ({ ...item, permissions: [...item.permissions, ...vPermissions.filter(permission => permission.includes(element))] }));
+            return setVRol(newRoles);
+        }
+    }
+    const handleDeleteEntity = async (element) => {
+        const filteredElements = vRol.filter(item => item.permissions.some(permission => permission.includes(element)));
+
+        if (filteredElements.length > 0) {
+            const newRoles = vRol.map(item => {
+                if (filteredElements.includes(item)) {
+                    return { ...item, permissions: item.permissions.filter(permission => !permission.includes(element)) };
+                } else {
+                    return item;
+                }
+            });
+            const newPermission = vPermissions.filter(permission => !permission.includes(element));
+            console.log(newPermission);
+            setVRol(newRoles) 
+            setVPermission(newPermission);
+        } else {
+            const newRoles = vRol.map(item => ({ ...item, permissions: item.permissions.filter(permission => !permission.includes(element)) }));
+            const newPermission = vPermissions.filter(permission => !permission.includes(element));
+            console.log(newPermission);
+            setVRol(newRoles) 
+            setVPermission(newPermission);
         }
     }
     const handleSave = async () => {
@@ -182,8 +242,24 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                             <th className='py-3 px-3 sticky left-0 top-0 bg-gray-100'></th>
                             {
                                 countRepeatWord(vPermissions).map((permission, index) => {
-                                    return <th className="text-center border-collapse border px-2" colSpan={permission.repeats} key={index}>
+                                    return <th className="text-center border-collapse border px-2 justify-between flex-row" colSpan={permission.repeats}
+                                        rowSpan={1}
+                                        key={index}
+                                        onMouseOver={() => handleMouseOverEntity(index)}
+                                        onMouseOut={handleMouseOutEntity}>
+                                        {selectedEntity === index && (
+                                            <FaRegSquare
+                                                onClick={() => handleUpdateEntity(`${permission.word}:`)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
                                         {capitalizeText(permission.word)}
+                                        {selectedEntity === index && (
+                                            <FaTrash
+                                                onClick={() => handleDeleteEntity(`${permission.word}:`)}
+                                                className="cursor-pointer"
+                                            />
+                                        )}
                                     </th>
                                 })
                             }
@@ -193,17 +269,17 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                             {
                                 vPermissions.map((permission, index) => {
                                     return <th className="text-center border-collapse border p-3 bg-gray-100 justify-between flex-row"
-                                        key={index} onMouseOver={() => handleMouseOver(index)}
-                                        onMouseOut={handleMouseOut}
+                                        key={index} onMouseOver={() => handleMouseOverPermission(index)}
+                                        onMouseOut={handleMouseOutPermission}
                                         colSpan={1}>
-                                        {selectedRow === index && (
+                                        {selectedPermission === index && (
                                             <FaRegSquare
-                                                onClick={() => handleDeleteRol(index)}
+                                                onClick={() => handleUpdateRol(permission)}
                                                 className="cursor-pointer"
                                             />
                                         )}
                                         {capitalizeText(permission.split(":")[1])}
-                                        {selectedRow === index && (
+                                        {selectedPermission === index && (
                                             <FaTrash
                                                 onClick={() => handleDeletePermission(permission)}
                                                 className="cursor-pointer"
@@ -223,19 +299,20 @@ const RoleAndPermissions = ({ roles, permissions }) => {
                         {
                             vRol.map((rol, index) => {
                                 return <tr className="p-3 text-center" key={index}>
-                                    <td className="sticky left-0 top-0 bg-white items-center flex" key={rol.id}
-                                        onMouseOver={() => handleMouseOver(rol.id)}
-                                        onMouseOut={handleMouseOut}
+                                    <td className="sticky left-0 top-0 bg-white items-center flex"
+                                        key={rol.id}
+                                        onMouseOver={() => handleMouseOverRol(rol.id)}
+                                        onMouseOut={handleMouseOutRol}
                                         colSpan={3}
                                         rowSpan={1}>
-                                        {selectedRow === rol.id && (
+                                        {selectedRol === rol.id && (
                                             <FaRegSquare
                                                 onClick={() => handlePermissions(rol.id)}
                                                 className="cursor-pointer"
                                             />
                                         )}
                                         {rol.name}
-                                        {selectedRow === rol.id && (
+                                        {selectedRol === rol.id && (
                                             <FaTrash
                                                 onClick={() => handleDeleteRol(rol.id)}
                                                 className="cursor-pointer"
